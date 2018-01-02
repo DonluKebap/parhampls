@@ -5,10 +5,24 @@ const moment = require("moment");
 const weather = require('weather-js');
 const request = require('request');
 const striptags = require('striptags');
+const http = require('http');
+const express = require('express');
+const app = express();
+const sql = require('sqlite');
+sql.open("./score.sqlite");
 require("moment-duration-format");
 
 // Ayarları config.json'dan alması için burası gerekli.
 const config = require("./config.json");
+
+app.get("/", (request, response) => {
+  console.log(Date.now() + "Ping alındı. Bu botun hayatta kalmasını sağlar!");
+  response.sendStatus(200);
+});
+app.listen(process.env.PORT);
+setInterval(() => {
+  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+}, 280000);
 
 client.on("ready", () => {
   // Bot düzgünce başladığında bu eylem çalışır
@@ -98,36 +112,55 @@ client.on('guildMemberRemove', member => {
   channel.send(embed);
 });
 
+const prefix = "p!";
+client.on("message", message => {
+  if (message.author.bot) return;
+if (message.channel.type !== "text") return;
+
+  if (!message.content.startsWith(prefix)) return;
+
+  if (message.content.startsWith(prefix + "seviyem")) {
+    sql.get(`SELECT * FROM scores WHERE userId ="${message.author.id}"`).then(row => {
+      if (!row) return message.reply("Yazııık seviyesi yok ;(");
+      message.reply(`Şuanki seviyeniz ${row.level}`);
+    });
+  } else
+
+  if (message.content.startsWith(prefix + "puanlarım")) {
+    sql.get(`SELECT * FROM scores WHERE userId ="${message.author.id}"`).then(row => {
+      if (!row) return message.reply("Yazıık hiç puanın yok!");
+      message.reply(`Toplamda ${row.points} puanın var, İyi gidiyorsun!`);
+    });
+  }
+});
+
 client.on('message', message => {
   if (message.content.toLowerCase() === 'sa') {
     message.channel.send(`Aleyküm selam, hoşgeldin ^^`)
-    message.reply(`👋`);
+    message.react(`👋`);
   }
 });
 
 client.on('message', message => {
   if (message.content.toLowerCase() === 'sea') {
     message.channel.send(`Aleyküm selam, hoşgeldin ^^`)
-    message.reply(`👋`);
+    message.react(`👋`);
   }
 });
 
 client.on('message', message => {
   if (message.content.toLowerCase() === 'selamun aleyküm') {
     message.channel.send(`Aleyküm selam, hoşgeldin ^^`)
-    message.reply(`👋`);
+    message.react(`👋`);
   }
 });
 
 client.on('message', message => {
   if (message.content.toLowerCase() === 'selamın aleyküm') {
     message.channel.send(`Aleyküm selam, hoşgeldin ^^`)
-    message.reply(`👋`);
+    message.react(`👋`);
   }
 });
-
-
-
 
 client.on('message', message => {
   let member = message.author.username
@@ -209,10 +242,10 @@ client.on("message", async message => {
     "**p!yazıtura** - Yazı ve tura, açıklanacak bir şey yok.:arrows_clockwise:\n**p!söyle** - Bot yazdığınız şeyi tekrarlar :speech_left:\n**p!sigara** - Sigara yakar:smoking:\n**p!özlüsöz** - Özlü sözler atar:ledger:\n**p!taşkağıtmakas** - :full_moon::ledger::scissors:*(Betada olduğu için çalışmayabilir!)* \n**p!soru** - Evet veya hayırlı sorular sormanıza yarar. :thinking:")
     .addField("**__Moderasyon Komutları__**",
     "**p!kick** - Üyeleri sunucudan atmanıza yarar :hammer:\n**p!ban** - Üyeleri yasaklamanıza yarar :no_entry:\n**p!sil** - Bir miktar mesaj siler:wastebasket:\n**p!sustur** - Kullanıcıyı SUSTURUR!:zipper_mouth:\n**p!davet** - Davet linkini atar. :white_check_mark: \n**p!anket** - Sunucu yöneticileri için alternatif anket sistemi :clipboard: \n**p!duyuru** - Sunucu yöneticileri için alternatif duyuru sistemi :mega:")
-    .addField('Ek Özellikler',
-    '*Küfür filtresi, her yaş grubuna veya değerlere uygun olmayan küfürleri engeller.*')
+    .addField('Ek Özellikler ve dahası',
+    '**__Parham\'da çıkan tüm sorunlara hemen erişebilmek için;\nhttps://twitter.com/parhamstatus__**\n\n**__Küfür filtresi, her yaş grubuna veya değerlere uygun olmayan küfürleri engeller.__**')
     .setImage('https://i.hizliresim.com/EyGd4g.jpg')
-    message.channel.send(embed);
+    message.channel.send(embed)
   }
 
   // Botun pingi ve API gecikmesi
@@ -667,7 +700,7 @@ message.channel.send("Değiştirdim, ama olmadı mı? Rolümün yüksekte olduğ
          .setFooter("FrostyDonuts tarafından oluşturuldu - 2017")
          return message.channel.send(profl);
  }
-
+ 
  // Mesaj silme komutu
   if(command === "sil") {
     if (!message.guild) {
